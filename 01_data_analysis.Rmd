@@ -9,31 +9,49 @@ output: github_document:
 ## Amplicon bioinformatics: from raw reads to tables
 
 ```{r}
-library("knitr")
-library("BiocManager")
-.cran_packages <- c("ggplot2", "gridExtra")
-.bioc_packages <- c("dada2", "phyloseq", "DECIPHER", "phangorn")
-.inst <- .cran_packages %in% installed.packages()
-if(any(!.inst)) {
-   install.packages(.cran_packages[!.inst])
-}
-.inst <- .bioc_packages %in% installed.packages()
-if(any(!.inst)) {
-   source("http://bioconductor.org/biocLite.R")
-   BiocManager::install(.bioc_packages[!.inst], ask = F)
-}
-# Load packages into session, and print package version
-sapply(c(.cran_packages, .bioc_packages), require, character.only = TRUE)
+library("dada2")
 ```
 
 ```{r}
-set.seed(100)
+path <- "~/CC2EcoG2/Seqreunies" # CHANGE ME to the directory containing the fastq files after unzipping.
+list.files(path)
 ```
 
+## Filter and Trim
 
+On filtre les séquences de faible qualité, puis on les enlève. On demande d'afficher les "moins bons".
 
+```{r}
+# Sort ensures forward/reverse reads are in same order
+fnFs <- sort(list.files(path, pattern="_R1.fastq"))
+fnRs <- sort(list.files(path, pattern="_R2.fastq"))
+# Extract sample names, assuming filenames have format: SAMPLENAME_XXX.fastq
+sampleNames <- sapply(strsplit(fnFs, "_"), `[`, 1)
+# Specify the full path to the fnFs and fnRs
+fnFs <- file.path(path, fnFs)
+fnRs <- file.path(path, fnRs)
+fnFs[1:3]
+```
 
+```{r}
+fnRs[1:3]
+```
 
+```{r}
+library(dada2)
+plotQualityProfile(fnFs[1:2])
+```
+
+```{r}
+plotQualityProfile(fnRs[1:2])
+```
+
+```{r}
+filt_path <- file.path(path, "filtered") # Place filtered files in filtered/ subdirectory
+if(!file_test("-d", filt_path)) dir.create(filt_path)
+filtFs <- file.path(filt_path, paste0(sampleNames, "_F_filt.fastq.gz"))
+filtRs <- file.path(filt_path, paste0(sampleNames, "_R_filt.fastq.gz"))
+```
 
 
 

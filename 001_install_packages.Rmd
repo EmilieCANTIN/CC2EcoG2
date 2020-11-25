@@ -1,0 +1,28 @@
+---
+title: "R Notebook"
+output: github_document:
+  toc: true
+  toc_deapth: 2
+---
+
+# Méthodes
+## Amplicon bioinformatics: from raw reads to tables
+
+```{r}
+library("knitr")
+library("BiocManager")
+.cran_packages <- c("ggplot2", "gridExtra")
+.bioc_packages <- c("dada2", "phyloseq", "DECIPHER", "phangorn")
+.inst <- .cran_packages %in% installed.packages()
+if(any(!.inst)) {
+   install.packages(.cran_packages[!.inst])
+}
+.inst <- .bioc_packages %in% installed.packages()
+if(any(!.inst)) {
+   source("http://bioconductor.org/biocLite.R")
+   BiocManager::install(.bioc_packages[!.inst], ask = F)
+}
+# Load packages into session, and print package version
+sapply(c(.cran_packages, .bioc_packages), require, character.only = TRUE)
+```
+
