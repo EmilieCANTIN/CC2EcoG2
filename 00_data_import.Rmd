@@ -1,0 +1,14 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{bash}
+wget https://pagesperso.univ-brest.fr/~maignien/teaching/M1-MFA/UE-Ecogenomique2/EcoG2_data_cc2.tar.gz
+```
+
+Décompression des données
+```{bash}
+tar xvzf EcoG2_data_cc2.tar.gz
+```
+
