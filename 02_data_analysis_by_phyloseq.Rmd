@@ -14,13 +14,15 @@ output: github_document:
 load("01_data_analysis_FinalEnv")
 ```
 
+# Appel des packages
 ```{r}
 library(phyloseq)
 library(Biostrings)
 library(ggplot2)
 ```
 
-# Combine data into a phyloseq object
+# Combiner les données dans un objet phyloseq
+Par exemple, la fonction data.frame permet de créer des cadres de données en couplant des variables qui partagent des propriétés de matrice et de liste.
 ```{r}
 samples.out <- rownames(seqtab.nochim)
 profondeur <- sapply(strsplit(samples.out, "D"), `[`, 1)
@@ -31,14 +33,17 @@ samdf$Date[samdf$Profondeur>11] <- c("mars","sept")
 rownames(samdf) <- samples.out
 ```
 
+On crée ici un fichier csv afin d'ordonner les paramètres, tels que les mois et la profondeur.
 ```{r}
 write.csv(samdf,"samdf.csv")
 ```
 
+On importe ici notre jeu de données dans l'objet samdf précédemment crée. Ce fichier comprend les informations de la rade de Brest, et notamment les dates et les profondeurs d'échantillonnage. Elles nous permettront de discriminer dans notre étude.
 ```{r}
 samdf <-read.table('~/CC2EcoG2/samdf.csv', sep=',', header=TRUE, row.names=1)
 ```
 
+L'objet ps que l'on crée ici rassemble les objets précédents nous renseignant sur l'assignation taxonomique et le nombre de séquences identifiées, et ce pour chaque échantillon.
 ```{r}
 library(phyloseq)
 ps <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), 
@@ -46,11 +51,17 @@ ps <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE),
                tax_table(taxa))
 ps
 ```
+Cela signifie donc que l'objet ps comporte 1557 taxons répartis sur 11 échantillons. Ces 11 échantillons ont chacun 2 variables. 
+
+# Indices d'alpha-diversité
 On se base ici sur l'objet ps précédemment créé pour construire notre graphique. 
 ```{r message=FALSE, warning=FALSE}
 plot_richness(ps, x="Date", measures=c("Shannon", "Simpson"), color="Profondeur")
 ```
+On sait que l'indice de Shannon permet de donner des informations sur la structure et la richesse des communautés. De plus, il permet de visualiser les "bruits" (soit les incertitudes) de nos échantillons. De même, l'indice de Simpson prend également en compte la richesse et la régularité.
+On peut donc différencier de plusieurs les périodes de mars et septembre. Premièrement, on peut dire les communautés bactériennes sont beaucoup plus diversifier dans les fonds. Ensuite, il semble y avoir une corrélation une corrélation entre la profondeur et la richesse en saison hivernale. En effet, on peut voir que les communautés bactériennes sont beaucoup plus diversifiées dans les fonds que en surface. 
 
+# Filtration des taxonomies
 ```{r}
 rank_names(ps)
 ```
@@ -58,6 +69,7 @@ rank_names(ps)
 ```{r}
 table(tax_table(ps)[, "Phylum"], exclude = NULL)
 ```
+On observe ici les différents phyla de l'objet phyloseq. Ainsi, il semble donc que les ... 
 
 ```{r}
 ps <- subset_taxa(ps, !is.na(Phylum) & !Phylum %in% c("", "uncharacterized"))
@@ -108,7 +120,7 @@ plot_ordination(pslog, out.wuf.log, color = "Profondeur", shape="Date") +
 top20 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:20]
 ps.top20 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
 ps.top20 <- prune_taxa(top20, ps.top20)
-plot_bar(ps.top20, x="Profondeur", fill="Family") + facet_wrap(~Profondeur, scales="free_x")
+plot_bar(ps.top20, x="Date", fill="Family") + facet_wrap(~Profondeur, scales="free_x")
 ```
 
 ```{r}
