@@ -8,8 +8,8 @@ output: github_document:
 # Méthodes
 ## Amplicon bioinformatics: des lectures aux tableaux
 
-1/ quelles sont les influences relative de la profondeur et de la saison sur la structure des communautes planctoniques de la rade de Brest
-2/ Quels sont les biomarkeurs de saison (hivers et ete) ?
+1/ quelles sont les influences relatives de la profondeur et de la saison sur la structure des communautes planctoniques de la rade de Brest ?
+2/ Quels sont les biomarqueurs de saison (hivers et ete) ?
 
 ```{r}
 library("dada2")
@@ -47,19 +47,20 @@ plotQualityProfile(fnRs[1:2])
 ```{r}
 filt_path <- file.path(path, "filtered") # Place filtered files in filtered/ subdirectory
 if(!file_test("-d", filt_path)) dir.create(filt_path)
-filtFs <- file.path(filt_path, paste0(sampleNames, "_F_filt.fastq.gz"))
-filtRs <- file.path(filt_path, paste0(sampleNames, "_R_filt.fastq.gz"))
+filtFs <- file.path(filt_path, paste0(sample.names, "_F_filt.fastq.gz"))
+filtRs <- file.path(filt_path, paste0(sample.names, "_R_filt.fastq.gz"))
 names(filtFs) <- sample.names
 names(filtRs) <- sample.names
 sample.names
 ```
 
 ```{r}
-out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs, truncLen=c(240,200), trimLeft=c(21),
+out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs, truncLen=c(240,200), trimLeft=c(21,21),
               maxN=0, maxEE=c(2,2), truncQ=2, rm.phix=TRUE,
               compress=TRUE, multithread=TRUE) # On Windows set multithread=FALSE
 head(out)
 ```
+
 # Learn the Error Rates
 
 ```{r}
@@ -91,6 +92,7 @@ mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE)
 # Inspect the merger data.frame from the first sample
 head(mergers[[1]])
 ```
+
 # Construct sequence table
 
 ```{r}
@@ -102,6 +104,7 @@ dim(seqtab)
 # Inspect distribution of sequence lengths
 table(nchar(getSequences(seqtab)))
 ```
+
 # Remove chimeras
 
 ```{r}
@@ -125,6 +128,7 @@ colnames(track) <- c("input", "filtered", "denoisedF", "denoisedR", "merged", "n
 rownames(track) <- sample.names
 head(track)
 ```
+
 # Assign taxonomy
 On va assigner une taxonomie aux données de la rade de Brest à partir de ce qu'on pourra observer de Silva. 
 
@@ -137,61 +141,9 @@ taxa.print <- taxa # Removing sequence rownames for display only
 rownames(taxa.print) <- NULL
 head(taxa.print)
 ```
-# Handoff to phyloseq
 
 ```{r}
-samples.out <- rownames(seqtab.nochim)
-subject <- sapply(strsplit(samples.out, "D"), `[`, 1)
-gender <- substr(subject,1,1)
-subject <- substr(subject,2,999)
-day <- as.integer(sapply(strsplit(samples.out, "D"), `[`, 2))
-samdf <- data.frame(Subject=subject, Gender=gender, Day=day)
-samdf$When <- "Early"
-samdf$When[samdf$Day>100] <- "Late"
-rownames(samdf) <- samples.out
+save.image(file = "01_data_analysis_FinalEnv")
 ```
-
-```{r}
-library(phyloseq)
-ps <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), 
-               sample_data(samdf), 
-               tax_table(taxa))
-ps <- prune_samples(sample_names(ps) != "Mock", ps) # Remove mock sample
-```
-
-```{r}
-dna <- Biostrings::DNAStringSet(taxa_names(ps))
-names(dna) <- taxa_names(ps)
-ps <- merge_phyloseq(ps, dna)
-taxa_names(ps) <- paste0("ASV", seq(ntaxa(ps)))
-ps
-```
-
-```{r}
-plot_richness(ps, x="Day", measures=c("Shannon", "Simpson"), color="When")
-```
-
-```{r}
-# Transform data to proportions as appropriate for Bray-Curtis distances
-ps.prop <- transform_sample_counts(ps, function(otu) otu/sum(otu))
-ord.nmds.bray <- ordinate(ps.prop, method="NMDS", distance="bray")
-```
-
-```{r}
-plot_ordination(ps.prop, ord.nmds.bray, color="When", title="Bray NMDS")
-```
-```{r}
-library(ggplot2)
-top20 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:20]
-ps.top20 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
-ps.top20 <- prune_taxa(top20, ps.top20)
-plot_bar(ps.top20, x="Day", fill="Family") + facet_wrap(~When, scales="free_x")
-```
-
-
-
-
-
-
 
 

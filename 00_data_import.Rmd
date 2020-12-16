@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output: github_document:
+  toc: true
+  toc_depth: 2
 ---
 
 ```{bash}
@@ -12,3 +14,12 @@ Décompression des données
 tar xvzf EcoG2_data_cc2.tar.gz
 ```
 
+# Assign taxonomy
+
+```{bash}
+wget https://zenodo.org/record/3986799/files/silva_nr99_v138_train_set.fa.gz
+```
+
+```{bash}
+wget https://zenodo.org/record/3986799/files/silva_nr99_v138_wSpecies_train_set.fa.gz
+```
