@@ -6,7 +6,7 @@ output: github_document:
 ---
 
 # Méthodes
-## Amplicon bioinformatics: des lectures aux tableaux
+## Des lectures aux tableaux
 
 1/ quelles sont les influences relatives de la profondeur et de la saison sur la structure des communautes planctoniques de la rade de Brest ?
 2/ Quels sont les biomarqueurs de saison (hivers et ete) ?
@@ -15,8 +15,9 @@ output: github_document:
 library("dada2")
 ```
 
+Ce premier code permet d’importer les données de l'étude de la rade de Brest, à partir d’un ensemble de fichiers fastq.Ici, on définit une variable chemin path, afin de pouvoir accéder à ces données.
 ```{r}
-path <- "~/CC2EcoG2/Seqreunies" # CHANGE ME to the directory containing the fastq files after unzipping.
+path <- "~/CC2EcoG2/Seqreunies" # MODIFIER le répertoire contenant les fichiers fastq après la décompression
 list.files(path)
 ```
 
@@ -25,7 +26,7 @@ list.files(path)
 On filtre les séquences de faible qualité, puis on les enlève. On demande ici d'afficher les "moins bons".
 
 ```{r}
-# Sort ensures forward/reverse reads are in same order
+# Le tri permet de s'assurer que les lectures en avant et en arrière sont dans le même ordre
 fnFs <- sort(list.files(path, pattern="_R1.fastq"))
 fnRs <- sort(list.files(path, pattern="_R2.fastq"))
 # Extract sample names, assuming filenames have format: SAMPLENAME_XXX.fastq
@@ -35,6 +36,7 @@ fnFs <- file.path(path, fnFs)
 fnRs <- file.path(path, fnRs)
 ```
 
+On sait que plus on se rapproche de la fin des séquençages, moins bonne sera leur qualité. En effet, on remarque que pour les lectures avant (deux premiers graphes), le score de qualité moyen ne descend jamais en dessous de 30. Au contraire, les graphes incarnant la fin des lectures montrent un score de qualité plus bas (~25). ce type de chiffre représente la probabilité que ce ne soit pas le bon nucléotide d’appelé. De ce fait, avec un Q20 en fin de séquences, il y a une chance sur 100 que ce soit le cas.
 ```{r}
 library(dada2)
 plotQualityProfile(fnFs[1:2])
