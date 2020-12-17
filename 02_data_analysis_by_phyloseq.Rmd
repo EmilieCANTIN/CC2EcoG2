@@ -1,8 +1,9 @@
 ---
 title: "Analyse_phyloseq_des_donnees_de_la_rade_de_Brest"
-output: github_document:
-  toc: true
-  toc_depth: 2
+output: 
+  github_document:
+    toc: true
+    toc_depth: 2
 ---
 
 1/ quelles sont les influences relatives de la profondeur et de la saison sur la structure des communautes planctoniques de la rade de Brest ? 
@@ -14,6 +15,7 @@ load("01_data_analysis_FinalEnv")
 ```
 
 # Appel des packages
+
 ```{r}
 library(phyloseq)
 library(Biostrings)
@@ -21,7 +23,9 @@ library(ggplot2)
 ```
 
 # Combiner les données dans un objet phyloseq
+
 Par exemple, la fonction data.frame permet de créer des cadres de données en couplant des variables qui partagent des propriétés de matrice et de liste.
+
 ```{r}
 samples.out <- rownames(seqtab.nochim)
 profondeur <- sapply(strsplit(samples.out, "D"), `[`, 1)
@@ -33,16 +37,19 @@ rownames(samdf) <- samples.out
 ```
 
 On crée ici un fichier csv afin d'ordonner les paramètres, tels que les mois et la profondeur.
+
 ```{r}
 write.csv(samdf,"samdf.csv")
 ```
 
 On importe ici notre jeu de données dans l'objet samdf précédemment crée. Ce fichier comprend les informations de la rade de Brest, et notamment les dates et les profondeurs d'échantillonnage. Elles nous permettront de discriminer dans notre étude.
+
 ```{r}
 samdf <-read.table('~/CC2EcoG2/samdf.csv', sep=',', header=TRUE, row.names=1)
 ```
 
 L'objet ps que l'on crée ici rassemble les objets précédents nous renseignant sur l'assignation taxonomique et le nombre de séquences identifiées, et ce pour chaque échantillon.
+
 ```{r}
 library(phyloseq)
 ps <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), 
@@ -53,15 +60,20 @@ ps
 Cela signifie donc que l'objet ps comporte 1557 taxons répartis sur 11 échantillons. Ces 11 échantillons ont chacun 2 variables. 
 
 # Indices d'alpha-diversité
+
 On se base ici sur l'objet ps précédemment créé pour construire notre graphique. 
+
 ```{r message=FALSE, warning=FALSE}
 plot_richness(ps, x="Date", measures=c("Shannon", "Simpson"), color="Profondeur")
 ```
+
 On sait que l'indice de Shannon permet de donner des informations sur la structure et la richesse des communautés. De plus, il permet de visualiser les "bruits" (soit les incertitudes) de nos échantillons. De même, l'indice de Simpson prend également en compte la richesse et la régularité.
 On peut donc différencier de plusieurs façons les périodes de mars et septembre. Premièrement, on peut dire que les communautés bactériennes sont beaucoup plus diversifier dans les fonds. Ensuite, il semble y avoir une corrélation une corrélation entre la profondeur et la richesse en saison estivale. En effet, on peut voir que les communautés bactériennes sont beaucoup plus diversifiées dans les fonds que en surface. 
 
 # Filtration des taxonomies
+
 La fonction rank_names permet de rendre compte des rangs taxonomiques disponibles dans l'objet ps.
+
 ```{r}
 rank_names(ps)
 ```
@@ -69,6 +81,7 @@ rank_names(ps)
 ```{r}
 table(tax_table(ps)[, "Phylum"], exclude = NULL)
 ```
+
 On observe ici les différents phyla de l'objet phyloseq. Ainsi, il semble donc que les protéobactéries soient les plus abondantes avec 786 occurences. Ensuite, de la même façon, on peut retrouver les Bacteroidota avec 238 occurences, et les cyanobactéries avec 142 occurrences. 
 
 ```{r}
@@ -86,10 +99,12 @@ prevdf = data.frame(Prevalence = prevdf,
                     tax_table(ps))
 ```
 
-La fonction plyr permet de séparer les différentes données. De ce fait, la colonne 1 correspond aux estimations d'abondances, et la 2 aux abondances observées. On effectue donc ici des estimations d'abondance. 
+La fonction plyr permet de séparer les différentes données. De ce fait, la colonne 1 correspond aux estimations d'abondances, et la 2 aux abondances observées. On effectue donc ici des estimations d'abondance.
+
 ```{r}
 plyr::ddply(prevdf, "Phylum", function(df1){cbind(mean(df1$Prevalence),sum(df1$Prevalence))})
 ```
+
 Cela nous permet de visualiser si tel ou tel phyla est retrouvé dans de nombreux échantillons et en quelle proportion. Ces résultats montrent bien que les protéobactéries sont extrêmement présentes, de même que les Bacteroidota et les cyanobactéries.
 
 # Filtrage de la prévalence
@@ -103,11 +118,14 @@ ggplot(prevdf1, aes(TotalAbundance, Prevalence / nsamples(ps),color=Phylum)) +
   scale_x_log10() +  xlab("Total Abundance") + ylab("Prevalence [Frac. Samples]") +
   facet_wrap(~Phylum) + theme(legend.position="none")
 ```
+
 Ces graphiques nous montrent la prévalence des phyla en fonction de leur abondance totale. Comme vu précédemment, les protéobactéries, ainsi que les Bacteroidota, ou encore les cyanobactéries, sont retrouvés en forte abondance. Toutefois, ce type de graphique ne nous permet pas de discriminer nos échantillons par la période de l'année.
 
 ## Première PCoA (Analyse en Composantes Principales)
+
 NB : Pour créer une DPCoA, on aurait eu besoin de l'arbre phylogénétique.
 Ici, nous avons effectué une ordination par PCoA avec l'indice de dissimilarité de Bray-Curtis. Il permet d'évaluer la distance, soit la dissimilarité entre deux échantillons.
+
 ```{r}
 pslog <- transform_sample_counts(ps, function(x) log(1 + x))
 out.wuf.log <- ordinate(pslog, method = "PCoA", distance = "bray")
@@ -118,29 +136,35 @@ evals <- out.wuf.log$values$Eigenvalues
 plot_ordination(pslog, out.wuf.log, color = "Profondeur", shape="Date") +
   labs(col = "Profondeur",shape= "Date")
 ```
+
 L'axe 1 traduit la distribution entre deux saisons. L'axe 2 traduit la distribution au sein d'une même saison.
 On observe une grande différence entre la distribution des données de mars (ronds) et de septembre (triangles). 
 Il semble donc n'y avoir pas de "cohabitation" entre les communautés bactériennes en septembre (été) et en mars (hiver). En effet, au niveau de l'axe 1, on peut voir qu'on a une certaine répartition des phyla au niveau des profondeurs. 
 Ensuite, on peut également relever des différences entre les différentes profondeurs par rapport à leur date. Par exemple, les populations bactériennes se différencient beaucoup plus en été. On peut donc dire que la saison influe plus sur la répartion des communautés bactériennes que la profondeur.
 
 # Histogrammes des abondances
+
 ## Abondances des différentes familles en fonction de la date et de la profondeur
+
 ```{r}
 top20 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:20]
 ps.top20 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
 ps.top20 <- prune_taxa(top20, ps.top20)
 plot_bar(ps.top20, x="Date", fill="Family") + facet_wrap(~Profondeur, scales="free_x")
 ```
+
 On peut observer les différentes familles marqué par les différences de couleurs. Il semble donc que la clade I soit la famille majoritaire pour chacune des conditions étudiées. Toutefois, on pourrait aussi citer les Cyanobiaceae comme famille particulièrement présente, et notamment au niveau médian et à la surface en période estivale.
 Par ailleurs, on peut noter l'influence de la profondeur sur la diversité, la structure des communautés et l'abondance bactérienne.
 
 ## Abondances des différents genres en fonction de la date et de la profondeur
+
 ```{r}
 top20 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:20]
 ps.top20 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
 ps.top20 <- prune_taxa(top20, ps.top20)
 plot_bar(ps.top20, x="Date", fill="Genus") + facet_wrap(~Profondeur, scales="free_x")
 ```
+
 Ce graphique là permet de préciser le type de biomarqueur que l'on pourrait utiliser. On peut constater que le genre de la Clade Ia prédomine presque partout, à l'exception de la surface en septembre (été). On peut de ce fait voir que Synechococcus CC9902 prédomine au niveau de la surface en période estivale.
 Par ailleurs, on remarque qu'à chaque profondeur l'abondance totale est moindre en période hivernale. Dès lors, on pourrait éventuellement utiliser Synechococcus en tant que biomarqueur pour la période estivale au niveau médian et à la surface. 
 Néanmoins, on ne peut pas conclure quant à un biomarqueur pour la période hivernale car la Clade Ia est présente chez les deux saisons étudiées.
