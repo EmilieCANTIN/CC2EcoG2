@@ -1,8 +1,9 @@
 ---
-title: "R Notebook"
-output: github_document:
-  toc: true
-  toc_depth: 2
+title: "Installation des packages"
+output: 
+  github_document:
+    toc: true
+    toc_depth: 2
 ---
 
 ``` {bash}
@@ -10,9 +11,7 @@ sudo apt-get update -y
 sudo apt-get install -y libglpk-dev
 ```
 
-#package install
-
-Following instruction on https://benjjneb.github.io/dada2/dada-installation.html
+En suivant les instructions sur https://benjjneb.github.io/dada2/dada-installation.html
 
 ```{r package install}
 if (!requireNamespace("BiocManager", quietly = TRUE))
