@@ -142,6 +142,9 @@ ps.top20 <- prune_taxa(top20, ps.top20)
 plot_bar(ps.top20, x="Date", fill="Genus") + facet_wrap(~Profondeur, scales="free_x")
 ```
 Ce graphique là permet de préciser le type de biomarqueur que l'on pourrait utiliser. On peut constater que le genre de la Clade Ia prédomine presque partout, à l'exception de la surface en septembre (été). On peut de ce fait voir que Synechococcus CC9902 prédomine au niveau de la surface en période estivale.
+Par ailleurs, on remarque qu'à chaque profondeur l'abondance totale est moindre en période hivernale. Dès lors, on pourrait éventuellement utiliser Synechococcus en tant que biomarqueur pour la période estivale au niveau médian et à la surface. 
+Néanmoins, on ne peut pas conclure quant à un biomarqueur pour la période hivernale car la Clade Ia est présente chez les deux saisons étudiées.
+
 
 
 
