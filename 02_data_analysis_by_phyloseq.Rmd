@@ -58,7 +58,7 @@ On se base ici sur l'objet ps précédemment créé pour construire notre graphi
 plot_richness(ps, x="Date", measures=c("Shannon", "Simpson"), color="Profondeur")
 ```
 On sait que l'indice de Shannon permet de donner des informations sur la structure et la richesse des communautés. De plus, il permet de visualiser les "bruits" (soit les incertitudes) de nos échantillons. De même, l'indice de Simpson prend également en compte la richesse et la régularité.
-On peut donc différencier de plusieurs les périodes de mars et septembre. Premièrement, on peut dire les communautés bactériennes sont beaucoup plus diversifier dans les fonds. Ensuite, il semble y avoir une corrélation une corrélation entre la profondeur et la richesse en saison hivernale. En effet, on peut voir que les communautés bactériennes sont beaucoup plus diversifiées dans les fonds que en surface. 
+On peut donc différencier de plusieurs façons les périodes de mars et septembre. Premièrement, on peut dire que les communautés bactériennes sont beaucoup plus diversifier dans les fonds. Ensuite, il semble y avoir une corrélation une corrélation entre la profondeur et la richesse en saison estivale. En effet, on peut voir que les communautés bactériennes sont beaucoup plus diversifiées dans les fonds que en surface. 
 
 # Filtration des taxonomies
 La fonction rank_names permet de rendre compte des rangs taxonomiques disponibles dans l'objet ps.
@@ -86,7 +86,7 @@ prevdf = data.frame(Prevalence = prevdf,
                     tax_table(ps))
 ```
 
-La colonne 1 correspond aux estimations d'abondances, et la 2 aux abondances observées. On effectue donc ici des estimations d'abondance. 
+La fonction plyr permet de séparer les différentes données. De ce fait, la colonne 1 correspond aux estimations d'abondances, et la 2 aux abondances observées. On effectue donc ici des estimations d'abondance. 
 ```{r}
 plyr::ddply(prevdf, "Phylum", function(df1){cbind(mean(df1$Prevalence),sum(df1$Prevalence))})
 ```
@@ -107,7 +107,7 @@ Ces graphiques nous montrent la prévalence des phyla en fonction de leur abonda
 
 ## Première PCoA (Analyse en Composantes Principales)
 NB : Pour créer une DPCoA, on aurait eu besoin de l'arbre phylogénétique.
-Ici, nous avons effectué une PCoA avec l'indice de dissimilarité de Bray-Curtis. Il permet d'évaluer la distance, soit la dissimilarité entre deux échantillons.
+Ici, nous avons effectué une ordination par PCoA avec l'indice de dissimilarité de Bray-Curtis. Il permet d'évaluer la distance, soit la dissimilarité entre deux échantillons.
 ```{r}
 pslog <- transform_sample_counts(ps, function(x) log(1 + x))
 out.wuf.log <- ordinate(pslog, method = "PCoA", distance = "bray")
@@ -118,8 +118,9 @@ evals <- out.wuf.log$values$Eigenvalues
 plot_ordination(pslog, out.wuf.log, color = "Profondeur", shape="Date") +
   labs(col = "Profondeur",shape= "Date")
 ```
-On observe une grande différence entre la distribution des données de mars (ronds) et de septembre (triangles). Il semble donc n'y avoir pas de "cohabitation" entre les communautés bactériennes en septembre (hiver) et en mars (été). 
-Ensuite, on peut également relever des différences entre les différentes profondeurs par rapport à leur date. Par exemple, ...
+L'axe 1 traduit la distribution entre deux saisons. L'axe 2 traduit la distribution au sein d'une même saison.
+On observe une grande différence entre la distribution des données de mars (ronds) et de septembre (triangles). Il semble donc n'y avoir pas de "cohabitation" entre les communautés bactériennes en septembre (été) et en mars (hiver). 
+Ensuite, on peut également relever des différences entre les différentes profondeurs par rapport à leur date. Par exemple, les populations bactériennes se différencient beaucoup plus en été. De plus, par rapport 
 
 # Histogrammes des abondances
 ## Abondances des différentes familles en fonction de la date et de la profondeur
