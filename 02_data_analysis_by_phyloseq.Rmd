@@ -119,8 +119,9 @@ plot_ordination(pslog, out.wuf.log, color = "Profondeur", shape="Date") +
   labs(col = "Profondeur",shape= "Date")
 ```
 L'axe 1 traduit la distribution entre deux saisons. L'axe 2 traduit la distribution au sein d'une même saison.
-On observe une grande différence entre la distribution des données de mars (ronds) et de septembre (triangles). Il semble donc n'y avoir pas de "cohabitation" entre les communautés bactériennes en septembre (été) et en mars (hiver). 
-Ensuite, on peut également relever des différences entre les différentes profondeurs par rapport à leur date. Par exemple, les populations bactériennes se différencient beaucoup plus en été. De plus, par rapport 
+On observe une grande différence entre la distribution des données de mars (ronds) et de septembre (triangles). 
+Il semble donc n'y avoir pas de "cohabitation" entre les communautés bactériennes en septembre (été) et en mars (hiver). En effet, au niveau de l'axe 1, on peut voir qu'on a une certaine répartition des phyla au niveau des profondeurs. 
+Ensuite, on peut également relever des différences entre les différentes profondeurs par rapport à leur date. Par exemple, les populations bactériennes se différencient beaucoup plus en été. On peut donc dire que la saison influe plus sur la répartion des communautés bactériennes que la profondeur.
 
 # Histogrammes des abondances
 ## Abondances des différentes familles en fonction de la date et de la profondeur
@@ -130,7 +131,8 @@ ps.top20 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
 ps.top20 <- prune_taxa(top20, ps.top20)
 plot_bar(ps.top20, x="Date", fill="Family") + facet_wrap(~Profondeur, scales="free_x")
 ```
-
+On peut observer les différentes familles marqué par les différences de couleurs. Il semble donc que la clade I soit la famille majoritaire pour chacune des conditions étudiées. Toutefois, on pourrait aussi citer les Cyanobiaceae comme famille particulièrement présente, et notamment au niveau médian et à la surface en période estivale.
+Par ailleurs, on peut noter l'influence de la profondeur sur la diversité, la structure des communautés et l'abondance bactérienne.
 
 ## Abondances des différents genres en fonction de la date et de la profondeur
 ```{r}
@@ -139,7 +141,7 @@ ps.top20 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
 ps.top20 <- prune_taxa(top20, ps.top20)
 plot_bar(ps.top20, x="Date", fill="Genus") + facet_wrap(~Profondeur, scales="free_x")
 ```
-On peut ici voir par exemple que Synechococcus CC9902 peut représenter un biomarqueur de la surface médiane en hiver.
+Ce graphique là permet de préciser le type de biomarqueur que l'on pourrait utiliser. On peut constater que le genre de la Clade Ia prédomine presque partout, à l'exception de la surface en septembre (été). On peut de ce fait voir que Synechococcus CC9902 prédomine au niveau de la surface en période estivale.
 
 
 
