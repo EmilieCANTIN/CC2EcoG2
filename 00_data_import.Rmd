@@ -1,20 +1,25 @@
 ---
-title: "R Notebook"
-output: github_document:
-  toc: true
-  toc_depth: 2
+title: "Importation des donnees"
+output: 
+  github_document:
+    toc: true
+    toc_depth: 2
+  
 ---
+
+# Importation des données de la rade de Brest
 
 ```{bash}
 wget https://pagesperso.univ-brest.fr/~maignien/teaching/M1-MFA/UE-Ecogenomique2/EcoG2_data_cc2.tar.gz
 ```
 
-Décompression des données
+## Décompression des données
+
 ```{bash}
 tar xvzf EcoG2_data_cc2.tar.gz
 ```
 
-# Assign taxonomy
+# Attribuer une taxonomie
 
 ```{bash}
 wget https://zenodo.org/record/3986799/files/silva_nr99_v138_train_set.fa.gz
