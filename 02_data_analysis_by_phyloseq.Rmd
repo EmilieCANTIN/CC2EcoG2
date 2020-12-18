@@ -1,7 +1,7 @@
 ---
 title: "Analyse_phyloseq_des_donnees_de_la_rade_de_Brest"
 output: 
-  md_document:
+  github_document:
     toc: true
     toc_depth: 2
 ---
