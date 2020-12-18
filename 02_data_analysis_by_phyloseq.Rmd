@@ -6,6 +6,8 @@ output:
     toc_depth: 2
 ---
 
+# Analyse phyloseq des donnees de la rade de Brest
+
 1/ quelles sont les influences relatives de la profondeur et de la saison sur la structure des communautes planctoniques de la rade de Brest ? 
 -> Shannon et Simpson seraient plutôt utilisés comme indice. On pourrait aussi utiliser l'ordination. 
 2/ Quels sont les biomarqueurs de saison (hiver et ete) ?
