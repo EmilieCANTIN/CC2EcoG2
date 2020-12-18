@@ -1,7 +1,7 @@
 ---
 title: "Analyse_phyloseq_des_donnees_de_la_rade_de_Brest"
 output: 
-  github_document:
+  md_document:
     toc: true
     toc_depth: 2
 ---
@@ -38,9 +38,7 @@ rownames(samdf) <- samples.out
 
 On crée ici un fichier csv afin d'ordonner les paramètres, tels que les mois et la profondeur.
 
-```{r}
-write.csv(samdf,"samdf.csv")
-```
+cf write.csv(samdf,"samdf.csv")
 
 On importe ici notre jeu de données dans l'objet samdf précédemment crée. Ce fichier comprend les informations de la rade de Brest, et notamment les dates et les profondeurs d'échantillonnage. Elles nous permettront de discriminer dans notre étude.
 

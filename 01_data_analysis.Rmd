@@ -16,6 +16,7 @@ library("dada2")
 ```
 
 Ce premier code permet d’importer les données de l'étude de la rade de Brest, à partir d’un ensemble de fichiers fastq.Ici, on définit une variable chemin path, afin de pouvoir accéder à ces données.
+
 ```{r}
 path <- "~/CC2EcoG2/Seqreunies" # MODIFIER le répertoire contenant les fichiers fastq après la décompression
 list.files(path)
@@ -36,7 +37,8 @@ fnFs <- file.path(path, fnFs)
 fnRs <- file.path(path, fnRs)
 ```
 
-On sait que plus on se rapproche de la fin des séquençages, moins bonne sera leur qualité. En effet, on remarque que pour les lectures avant (deux premiers graphes), le score de qualité moyen ne descend jamais en dessous de 30. Au contraire, les graphes incarnant la fin des lectures montrent un score de qualité plus bas (~25). ce type de chiffre représente la probabilité que ce ne soit pas le bon nucléotide d’appelé. De ce fait, avec un Q20 en fin de séquences, il y a une chance sur 100 que ce soit le cas.
+On sait que plus on se rapproche de la fin des séquençages, moins bonne sera leur qualité. En effet, on remarque que pour les lectures avant (deux premiers graphes), le score de qualité moyen ne descend jamais en dessous de 30. Au contraire, les graphes incarnant la fin des lectures montrent un score de qualité plus bas (~25). Ce type de chiffre représente la probabilité que ce ne soit pas le bon nucléotide d’appelé. De ce fait, avec un Q30 en début de séquences, il y a une chance sur 1000 que ce soit le cas.
+
 ```{r}
 library(dada2)
 plotQualityProfile(fnFs[1:2])
@@ -46,8 +48,10 @@ plotQualityProfile(fnFs[1:2])
 plotQualityProfile(fnRs[1:2])
 ```
 
+On voit bien ici la moins bonne qualité des fins de séquences, que ce soit en été ou en hiver. En effet, les scores de qualités baissent vers la position 240 pour les premières lectures, et plutôt vers la position 200 pour les lectures arrières. En prenant ces informations en compte, on va pouvoir dans un premier temps créer des variables pour les fichiers filtrés, puis appliquer la fonction filterAndTrim.
+
 ```{r}
-filt_path <- file.path(path, "filtered") # Place filtered files in filtered/ subdirectory
+filt_path <- file.path(path, "filtered") # Placez les fichiers filtrés dans le sous-répertoire "filtered"
 if(!file_test("-d", filt_path)) dir.create(filt_path)
 filtFs <- file.path(filt_path, paste0(sample.names, "_F_filt.fastq.gz"))
 filtRs <- file.path(filt_path, paste0(sample.names, "_R_filt.fastq.gz"))
@@ -56,6 +60,10 @@ names(filtRs) <- sample.names
 sample.names
 ```
 
+## Filtrez les lectures en amont et en aval
+
+Cette fonction se base sur des fichiers contenant les lectures coupées ayant passées les filtres. "TrimLeft" permet de retirer les primers afin de ne pas les intégrer aux séquences étudiées. 
+
 ```{r}
 out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs, truncLen=c(240,200), trimLeft=c(21,21),
               maxN=0, maxEE=c(2,2), truncQ=2, rm.phix=TRUE,
@@ -63,7 +71,9 @@ out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs, truncLen=c(240,200), trimLeft=c
 head(out)
 ```
 
-# Learn the Error Rates
+# Connaître les taux d'erreur
+
+Ci-dessous, la fonction learnErrors permet d’estimer les taux d’erreurs à partir d’un grand ensemble de données. Ainsi, les résultats ci-après expriment le nombre de bases qui sera finalement utilisé, par rapport au premier ensemble.
 
 ```{r}
 errF <- learnErrors(filtFs, multithread=TRUE)
@@ -77,7 +87,17 @@ errR <- learnErrors(filtRs, multithread=TRUE)
 plotErrors(errF, nominalQ=TRUE)
 ```
 
-# Sample Inference
+```{r}
+library(ggplot2)
+library(dada2)
+plotErrors(errF, nominalQ=TRUE)
+```
+
+Les figures ci-dessus représentent les estimations des taux d’erreurs en fonction du score de qualité. La ligne rouge incarne la tendance générale du graphique. Ensuite, les points noirs reflètent le taux d’erreurs observées, et la ligne noire le taux d’erreurs ajustées. On peut donc observer ci-dessus la fréquence du taux d’erreur en fonction du score de qualité. Aucune différence significative ne peut être relevée entre errR et errF. En effet, on observe la même tendance : moins il y a d’erreurs, plus le score de qualité augmente, ce qui est en accord avec les résultats attendus.
+
+## Exemple d'inférence
+
+La fonction dada retire les erreurs de séquençage et renvoie la composition déduite des échantillons.
 
 ```{r}
 dadaFs <- dada(filtFs, err=errF, multithread=TRUE)
@@ -91,7 +111,7 @@ dadaRs <- dada(filtRs, err=errR, multithread=TRUE)
 
 ```{r}
 mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE)
-# Inspect the merger data.frame from the first sample
+# Inspecter le fichier "merger data.frame" du premier échantillon
 head(mergers[[1]])
 ```
 
