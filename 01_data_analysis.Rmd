@@ -1,15 +1,16 @@
 ---
 title: "Analyse_des_données_de_la_rade_de_Brest"
-output: github_document:
-  toc: true
-  toc_depth: 2
+output: 
+  github_document:
+    toc: true
+    toc_depth: 2
 ---
 
 # Méthodes
 ## Des lectures aux tableaux
 
 1/ quelles sont les influences relatives de la profondeur et de la saison sur la structure des communautes planctoniques de la rade de Brest ?
-2/ Quels sont les biomarqueurs de saison (hivers et ete) ?
+2/ Quels sont les biomarqueurs de saison (hiver et ete) ?
 
 ```{r}
 library("dada2")
@@ -107,7 +108,7 @@ dadaFs <- dada(filtFs, err=errF, multithread=TRUE)
 dadaRs <- dada(filtRs, err=errR, multithread=TRUE)
 ```
 
-# Merge paired reads
+# Fusions des lectures et élimination des chimères
 
 ```{r}
 mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE)
@@ -115,44 +116,51 @@ mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE)
 head(mergers[[1]])
 ```
 
-# Construct sequence table
+## Construire un tableau séquentiel
 
 ```{r}
 seqtab <- makeSequenceTable(mergers)
+# Récupérer ou définir la dimension d'un objet
 dim(seqtab)
 ```
 
 ```{r}
-# Inspect distribution of sequence lengths
+# Contrôler la distribution des longueurs de séquence
 table(nchar(getSequences(seqtab)))
 ```
 
-# Remove chimeras
+Ici, il supprime les séquences reproduites en comparant chaque séquence aux autres.
+
+## Supprimer les chimères
 
 ```{r}
 seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=TRUE, verbose=TRUE)
 dim(seqtab.nochim)
 ```
 
+On peut donc dire que les chimères représentent environ 11% des variantes de séquences.
+
 ```{r}
 sum(seqtab.nochim)/sum(seqtab)
 ```
+
 Il y a environ 23 pourcents de chimères. 
 
-# Track reads through the pipeline
+# "Track reads through the pipeline"
 
 ```{r}
 library(dada2)
 getN <- function(x) sum(getUniques(x))
 track <- cbind(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(mergers, getN), rowSums(seqtab.nochim))
-# If processing a single sample, remove the sapply calls: e.g. replace sapply(dadaFs, getN) with getN(dadaFs)
+# Si vous traitez un seul échantillon, supprimez les sapply : remplacez sapply(dadaFs, getN) par getN(dadaFs)
 colnames(track) <- c("input", "filtered", "denoisedF", "denoisedR", "merged", "nonchim")
 rownames(track) <- sample.names
 head(track)
 ```
 
-# Assign taxonomy
-On va assigner une taxonomie aux données de la rade de Brest à partir de ce qu'on pourra observer de Silva. 
+# Attribuer une taxonomie
+
+On va assigner une taxonomie aux données de la rade de Brest à partir de ce qu'on pourra observer de Silva. Cela est rendu possible car l’ARN 16S est un marqueur extrêmement bien classé. Tout d’abord, il nous faut importer les données Silva, qui nous serviront à réaliser l’arbre taxonomique. Vous pourrez retrouver les codes nécessaires dans 00_data_import.
 
 ```{r}
 taxa <- assignTaxonomy(seqtab.nochim, "~/silva_nr99_v138_train_set.fa.gz", multithread=TRUE)
@@ -163,6 +171,8 @@ taxa.print <- taxa # Removing sequence rownames for display only
 rownames(taxa.print) <- NULL
 head(taxa.print)
 ```
+
+On peut ici remarquer la présence de plusieurs genres différents. On pourra étudier leur répartition en fonction de la profondeur et de la saison dans l'étude phyloseq. 
 
 ```{r}
 save.image(file = "01_data_analysis_FinalEnv")
