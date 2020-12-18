@@ -13,6 +13,8 @@ sudo apt-get install -y libglpk-dev
 
 En suivant les instructions sur https://benjjneb.github.io/dada2/dada-installation.html
 
+# Installation de BiocManager et dada2
+
 ```{r package install}
 if (!requireNamespace("BiocManager", quietly = TRUE))
 install.packages("BiocManager")
@@ -20,25 +22,37 @@ BiocManager::install(version = '3.11')
 BiocManager::install("dada2", version = "3.11")
 ```
 
+# Installation de phyloseq
+
 ```{r}
 BiocManager::install("phyloseq")
 ```
+
+# Installation de phangorn
 
 ```{r}
 BiocManager::install("phangorn")
 ```
 
+# Installation de Decipher
+
 ```{r}
 BiocManager::install("DECIPHER")
 ```
+
+# Installation de gridExtra
 
 ```{r}
 install.packages("gridExtra")
 ```
 
+# Installation de ggplot2
+
 ```{r}
 install.packages('ggplot2')
 ```
+
+# Autres installations
 
 ```{r}
 library("knitr")
@@ -81,12 +95,16 @@ if(any(!.inst)){
 
 ```
 
+# Installation de DeSeq2
+
 ```{r}
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
 BiocManager::install("DESeq2")
 ```
+
+# Installation de StructSSI et usethis
 
 ```{bash}
 wget https://cran.r-project.org/src/contrib/Archive/structSSI/structSSI_1.1.1.tar.gz
@@ -101,10 +119,14 @@ library(devtools)
 install_local("./structSSI_1.1.1.tar.gz")
 ```
 
+# Installation de ade4 et factoextra
+
 ```{r}
 install.packages("ade4") # Calcul de l'ACP
 install.packages("factoextra")# Visualisation de l'ACP
 ```
+
+# Installation de RMarkdown
 
 ```{r}
 install.packages("rmarkdown")
