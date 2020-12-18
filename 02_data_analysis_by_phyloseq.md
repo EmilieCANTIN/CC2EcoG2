@@ -1,38 +1,32 @@
-Analyse\_phyloseq\_des\_donnees\_de\_la\_rade\_de\_Brest
-================
-
-  - [Appel des packages](#appel-des-packages)
-  - [Combiner les données dans un objet
+-   [Appel des packages](#appel-des-packages)
+-   [Combiner les données dans un objet
     phyloseq](#combiner-les-données-dans-un-objet-phyloseq)
-  - [Indices d’alpha-diversité](#indices-dalpha-diversité)
-  - [Filtration des taxonomies](#filtration-des-taxonomies)
-  - [Filtrage de la prévalence](#filtrage-de-la-prévalence)
-      - [Première PCoA (Analyse en Composantes
+-   [Indices d’alpha-diversité](#indices-dalpha-diversité)
+-   [Filtration des taxonomies](#filtration-des-taxonomies)
+-   [Filtrage de la prévalence](#filtrage-de-la-prévalence)
+    -   [Première PCoA (Analyse en Composantes
         Principales)](#première-pcoa-analyse-en-composantes-principales)
-  - [Histogrammes des abondances](#histogrammes-des-abondances)
-      - [Abondances des différentes familles en fonction de la date et
+-   [Histogrammes des abondances](#histogrammes-des-abondances)
+    -   [Abondances des différentes familles en fonction de la date et
         de la
         profondeur](#abondances-des-différentes-familles-en-fonction-de-la-date-et-de-la-profondeur)
-      - [Abondances des différents genres en fonction de la date et de
+    -   [Abondances des différents genres en fonction de la date et de
         la
         profondeur](#abondances-des-différents-genres-en-fonction-de-la-date-et-de-la-profondeur)
 
 1/ quelles sont les influences relatives de la profondeur et de la
 saison sur la structure des communautes planctoniques de la rade de
-Brest ? -\> Shannon et Simpson seraient plutôt utilisés comme indice. On
-pourrait aussi utiliser l’ordination. 2/ Quels sont les biomarqueurs de
-saison (hiver et ete) ?
+Brest ? -&gt; Shannon et Simpson seraient plutôt utilisés comme indice.
+On pourrait aussi utiliser l’ordination. 2/ Quels sont les biomarqueurs
+de saison (hiver et ete) ?
 
-``` r
-load("01_data_analysis_FinalEnv")
-```
+    load("01_data_analysis_FinalEnv")
 
-# Appel des packages
+Appel des packages
+==================
 
-``` r
-library(phyloseq)
-library(Biostrings)
-```
+    library(phyloseq)
+    library(Biostrings)
 
     ## Loading required package: BiocGenerics
 
@@ -89,37 +83,30 @@ library(Biostrings)
     ## 
     ##     strsplit
 
-``` r
-library(ggplot2)
-```
+    library(ggplot2)
 
-# Combiner les données dans un objet phyloseq
+Combiner les données dans un objet phyloseq
+===========================================
 
 Par exemple, la fonction data.frame permet de créer des cadres de
 données en couplant des variables qui partagent des propriétés de
 matrice et de liste.
 
-``` r
-samples.out <- rownames(seqtab.nochim)
-profondeur <- sapply(strsplit(samples.out, "D"), `[`, 1)
-date <- substr(profondeur,0,11)
-samdf <- data.frame(Profondeur=profondeur, Date=date)
-samdf$Profondeur[samdf$Date>11] <- c("Fond","Median","Surface")
-```
+    samples.out <- rownames(seqtab.nochim)
+    profondeur <- sapply(strsplit(samples.out, "D"), `[`, 1)
+    date <- substr(profondeur,0,11)
+    samdf <- data.frame(Profondeur=profondeur, Date=date)
+    samdf$Profondeur[samdf$Date>11] <- c("Fond","Median","Surface")
 
     ## Warning in samdf$Profondeur[samdf$Date > 11] <- c("Fond", "Median", "Surface"):
     ## number of items to replace is not a multiple of replacement length
 
-``` r
-samdf$Date[samdf$Profondeur>11] <- c("mars","sept")
-```
+    samdf$Date[samdf$Profondeur>11] <- c("mars","sept")
 
     ## Warning in samdf$Date[samdf$Profondeur > 11] <- c("mars", "sept"): number of
     ## items to replace is not a multiple of replacement length
 
-``` r
-rownames(samdf) <- samples.out
-```
+    rownames(samdf) <- samples.out
 
 On crée ici un fichier csv afin d’ordonner les paramètres, tels que les
 mois et la profondeur.
@@ -131,21 +118,17 @@ crée. Ce fichier comprend les informations de la rade de Brest, et
 notamment les dates et les profondeurs d’échantillonnage. Elles nous
 permettront de discriminer dans notre étude.
 
-``` r
-samdf <-read.table('~/CC2EcoG2/samdf.csv', sep=',', header=TRUE, row.names=1)
-```
+    samdf <-read.table('~/CC2EcoG2/samdf.csv', sep=',', header=TRUE, row.names=1)
 
 L’objet ps que l’on crée ici rassemble les objets précédents nous
 renseignant sur l’assignation taxonomique et le nombre de séquences
 identifiées, et ce pour chaque échantillon.
 
-``` r
-library(phyloseq)
-ps <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), 
-               sample_data(samdf), 
-               tax_table(taxa))
-ps
-```
+    library(phyloseq)
+    ps <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), 
+                   sample_data(samdf), 
+                   tax_table(taxa))
+    ps
 
     ## phyloseq-class experiment-level object
     ## otu_table()   OTU Table:         [ 1557 taxa and 11 samples ]
@@ -155,16 +138,15 @@ ps
 Cela signifie donc que l’objet ps comporte 1557 taxons répartis sur 11
 échantillons. Ces 11 échantillons ont chacun 2 variables.
 
-# Indices d’alpha-diversité
+Indices d’alpha-diversité
+=========================
 
 On se base ici sur l’objet ps précédemment créé pour construire notre
 graphique.
 
-``` r
-plot_richness(ps, x="Date", measures=c("Shannon", "Simpson"), color="Profondeur")
-```
+    plot_richness(ps, x="Date", measures=c("Shannon", "Simpson"), color="Profondeur")
 
-![](02_data_analysis_by_phyloseq_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](02_data_analysis_by_phyloseq_files/figure-markdown_strict/unnamed-chunk-6-1.png)
 
 On sait que l’indice de Shannon permet de donner des informations sur la
 structure et la richesse des communautés. De plus, il permet de
@@ -178,20 +160,17 @@ richesse en saison estivale. En effet, on peut voir que les communautés
 bactériennes sont beaucoup plus diversifiées dans les fonds que en
 surface.
 
-# Filtration des taxonomies
+Filtration des taxonomies
+=========================
 
 La fonction rank\_names permet de rendre compte des rangs taxonomiques
 disponibles dans l’objet ps.
 
-``` r
-rank_names(ps)
-```
+    rank_names(ps)
 
     ## [1] "Kingdom" "Phylum"  "Class"   "Order"   "Family"  "Genus"
 
-``` r
-table(tax_table(ps)[, "Phylum"], exclude = NULL)
-```
+    table(tax_table(ps)[, "Phylum"], exclude = NULL)
 
     ## 
     ##              Actinobacteriota                  Bacteroidota 
@@ -227,28 +206,22 @@ occurences. Ensuite, de la même façon, on peut retrouver les
 Bacteroidota avec 238 occurences, et les cyanobactéries avec 142
 occurrences.
 
-``` r
-ps <- subset_taxa(ps, !is.na(Phylum) & !Phylum %in% c("", "uncharacterized"))
-```
+    ps <- subset_taxa(ps, !is.na(Phylum) & !Phylum %in% c("", "uncharacterized"))
 
-``` r
-# Calculer la prévalence de chaque caractéristique, stocker sous forme de data.frame
-prevdf = apply(X = otu_table(ps),
-               MARGIN = ifelse(taxa_are_rows(ps), yes = 1, no = 2),
-               FUN = function(x){sum(x > 0)})
-# Ajoutez la taxonomie et le nombre total de lectures à ces données.
-prevdf = data.frame(Prevalence = prevdf,
-                    TotalAbundance = taxa_sums(ps),
-                    tax_table(ps))
-```
+    # Calculer la prévalence de chaque caractéristique, stocker sous forme de data.frame
+    prevdf = apply(X = otu_table(ps),
+                   MARGIN = ifelse(taxa_are_rows(ps), yes = 1, no = 2),
+                   FUN = function(x){sum(x > 0)})
+    # Ajoutez la taxonomie et le nombre total de lectures à ces données.
+    prevdf = data.frame(Prevalence = prevdf,
+                        TotalAbundance = taxa_sums(ps),
+                        tax_table(ps))
 
 La fonction plyr permet de séparer les différentes données. De ce fait,
 la colonne 1 correspond aux estimations d’abondances, et la 2 aux
 abondances observées. On effectue donc ici des estimations d’abondance.
 
-``` r
-plyr::ddply(prevdf, "Phylum", function(df1){cbind(mean(df1$Prevalence),sum(df1$Prevalence))})
-```
+    plyr::ddply(prevdf, "Phylum", function(df1){cbind(mean(df1$Prevalence),sum(df1$Prevalence))})
 
     ##                           Phylum        1    2
     ## 1               Actinobacteriota 3.727273   82
@@ -282,19 +255,18 @@ nombreux échantillons et en quelle proportion. Ces résultats montrent
 bien que les protéobactéries sont extrêmement présentes, de même que les
 Bacteroidota et les cyanobactéries.
 
-# Filtrage de la prévalence
+Filtrage de la prévalence
+=========================
 
-``` r
-# Subset to the remaining phyla
-prevdf1 = subset(prevdf, Phylum %in% get_taxa_unique(ps, "Phylum"))
-ggplot(prevdf1, aes(TotalAbundance, Prevalence / nsamples(ps),color=Phylum)) +
-  # Inclure une estimation pour le paramètre
-  geom_hline(yintercept = 0.05, alpha = 0.5, linetype = 2) +  geom_point(size = 2, alpha = 0.7) +
-  scale_x_log10() +  xlab("Total Abundance") + ylab("Prevalence [Frac. Samples]") +
-  facet_wrap(~Phylum) + theme(legend.position="none")
-```
+    # Subset to the remaining phyla
+    prevdf1 = subset(prevdf, Phylum %in% get_taxa_unique(ps, "Phylum"))
+    ggplot(prevdf1, aes(TotalAbundance, Prevalence / nsamples(ps),color=Phylum)) +
+      # Inclure une estimation pour le paramètre
+      geom_hline(yintercept = 0.05, alpha = 0.5, linetype = 2) +  geom_point(size = 2, alpha = 0.7) +
+      scale_x_log10() +  xlab("Total Abundance") + ylab("Prevalence [Frac. Samples]") +
+      facet_wrap(~Phylum) + theme(legend.position="none")
 
-![](02_data_analysis_by_phyloseq_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](02_data_analysis_by_phyloseq_files/figure-markdown_strict/unnamed-chunk-12-1.png)
 
 Ces graphiques nous montrent la prévalence des phyla en fonction de leur
 abondance totale. Comme vu précédemment, les protéobactéries, ainsi que
@@ -302,25 +274,22 @@ les Bacteroidota, ou encore les cyanobactéries, sont retrouvés en forte
 abondance. Toutefois, ce type de graphique ne nous permet pas de
 discriminer nos échantillons par la période de l’année.
 
-## Première PCoA (Analyse en Composantes Principales)
+Première PCoA (Analyse en Composantes Principales)
+--------------------------------------------------
 
 NB : Pour créer une DPCoA, on aurait eu besoin de l’arbre
 phylogénétique. Ici, nous avons effectué une ordination par PCoA avec
 l’indice de dissimilarité de Bray-Curtis. Il permet d’évaluer la
 distance, soit la dissimilarité entre deux échantillons.
 
-``` r
-pslog <- transform_sample_counts(ps, function(x) log(1 + x))
-out.wuf.log <- ordinate(pslog, method = "PCoA", distance = "bray")
-```
+    pslog <- transform_sample_counts(ps, function(x) log(1 + x))
+    out.wuf.log <- ordinate(pslog, method = "PCoA", distance = "bray")
 
-``` r
-evals <- out.wuf.log$values$Eigenvalues
-plot_ordination(pslog, out.wuf.log, color = "Profondeur", shape="Date") +
-  labs(col = "Profondeur",shape= "Date")
-```
+    evals <- out.wuf.log$values$Eigenvalues
+    plot_ordination(pslog, out.wuf.log, color = "Profondeur", shape="Date") +
+      labs(col = "Profondeur",shape= "Date")
 
-![](02_data_analysis_by_phyloseq_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](02_data_analysis_by_phyloseq_files/figure-markdown_strict/unnamed-chunk-14-1.png)
 
 L’axe 1 traduit la distribution entre deux saisons. L’axe 2 traduit la
 distribution au sein d’une même saison. On observe une grande différence
@@ -335,18 +304,18 @@ différencient beaucoup plus en été. On peut donc dire que la saison
 influe plus sur la répartion des communautés bactériennes que la
 profondeur.
 
-# Histogrammes des abondances
+Histogrammes des abondances
+===========================
 
-## Abondances des différentes familles en fonction de la date et de la profondeur
+Abondances des différentes familles en fonction de la date et de la profondeur
+------------------------------------------------------------------------------
 
-``` r
-top20 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:20]
-ps.top20 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
-ps.top20 <- prune_taxa(top20, ps.top20)
-plot_bar(ps.top20, x="Date", fill="Family") + facet_wrap(~Profondeur, scales="free_x")
-```
+    top20 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:20]
+    ps.top20 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
+    ps.top20 <- prune_taxa(top20, ps.top20)
+    plot_bar(ps.top20, x="Date", fill="Family") + facet_wrap(~Profondeur, scales="free_x")
 
-![](02_data_analysis_by_phyloseq_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](02_data_analysis_by_phyloseq_files/figure-markdown_strict/unnamed-chunk-15-1.png)
 
 On peut observer les différentes familles marqué par les différences de
 couleurs. Il semble donc que la clade I soit la famille majoritaire pour
@@ -356,16 +325,15 @@ niveau médian et à la surface en période estivale. Par ailleurs, on peut
 noter l’influence de la profondeur sur la diversité, la structure des
 communautés et l’abondance bactérienne.
 
-## Abondances des différents genres en fonction de la date et de la profondeur
+Abondances des différents genres en fonction de la date et de la profondeur
+---------------------------------------------------------------------------
 
-``` r
-top20 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:20]
-ps.top20 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
-ps.top20 <- prune_taxa(top20, ps.top20)
-plot_bar(ps.top20, x="Date", fill="Genus") + facet_wrap(~Profondeur, scales="free_x")
-```
+    top20 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:20]
+    ps.top20 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
+    ps.top20 <- prune_taxa(top20, ps.top20)
+    plot_bar(ps.top20, x="Date", fill="Genus") + facet_wrap(~Profondeur, scales="free_x")
 
-![](02_data_analysis_by_phyloseq_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](02_data_analysis_by_phyloseq_files/figure-markdown_strict/unnamed-chunk-16-1.png)
 
 Ce graphique là permet de préciser le type de biomarqueur que l’on
 pourrait utiliser. On peut constater que le genre de la Clade Ia
